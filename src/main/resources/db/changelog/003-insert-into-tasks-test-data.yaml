@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-insert-test-data
+      author: lleWell
+      changes:
+        - insert:
+            tableName: tasks
+            columns:
+              - column:
+                  name: title
+                  value: "First Task"
+
+              - column:
+                  name: description
+                  value: "It is a first task"
+
+              - column:
+                  name: status
+                  value: "PENDING"
+
+
