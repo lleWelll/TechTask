@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 002-create-table-tasks
+      id: 001-create-table-tasks
       author: lleWell
       changes:
         - createTable:
@@ -26,7 +26,7 @@ databaseChangeLog:
 
               - column:
                   name: status
-                  type: task_status
+                  type: VARCHAR(25)
                   defaultValue: PENDING
                   constraints:
                     nullable: false

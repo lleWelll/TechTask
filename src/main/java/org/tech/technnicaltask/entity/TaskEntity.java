@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.tech.technnicaltask.utils.Status;
 
 import java.time.LocalDateTime;

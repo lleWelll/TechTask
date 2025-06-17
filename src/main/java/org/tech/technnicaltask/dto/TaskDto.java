@@ -1,7 +1,7 @@
 package org.tech.technnicaltask.dto;
 
 import lombok.Data;
-import org.tech.technnicaltask.utils.Status;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,15 +9,21 @@ import java.util.UUID;
 @Data
 public class TaskDto {
 
+	//This field can be null
 	private UUID id;
 
+	@NotEmpty(message = "title can't be null or empty")
 	private String title;
 
+	//This field can be null
 	private String description;
 
-	private Status status;
+	@NotNull(message = "status is required")
+	private String status;
 
+	//This field can be null
 	private LocalDateTime createdAt;
 
+	//This field can be null
 	private LocalDateTime updatedAt;
 }

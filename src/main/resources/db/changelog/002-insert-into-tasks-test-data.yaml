@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 003-insert-test-data
+      id: 002-insert-test-data
       author: lleWell
       changes:
         - insert:
@@ -17,5 +17,20 @@ databaseChangeLog:
               - column:
                   name: status
                   value: "PENDING"
+
+        - insert:
+            tableName: tasks
+            columns:
+              - column:
+                  name: title
+                  value: "Second Task"
+
+              - column:
+                  name: description
+                  value: "No Description"
+
+              - column:
+                  name: status
+                  value: "IN_PROGRESS"
 
 
