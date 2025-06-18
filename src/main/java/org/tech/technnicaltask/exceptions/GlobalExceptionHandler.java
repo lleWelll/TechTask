@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(BadRequestException.class)
-	public ExceptionResponseDto handleIllegalArgumentException(BadRequestException e, HttpServletRequest req) {
+	public ExceptionResponseDto handleBadRequestException(BadRequestException e, HttpServletRequest req) {
 		log.error(e.getMessage());
 		return new ExceptionResponseDto(HttpStatus.BAD_REQUEST.value(), e.getClass().getSimpleName(), e.getMessage(), LocalDateTime.now(), req.getRequestURI());
 	}

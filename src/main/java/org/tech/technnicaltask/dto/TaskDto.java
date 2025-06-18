@@ -1,12 +1,15 @@
 package org.tech.technnicaltask.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import jakarta.validation.constraints.*;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@Builder
 public class TaskDto {
 
 	//This field can be null

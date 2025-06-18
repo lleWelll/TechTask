@@ -43,7 +43,7 @@ public class TaskRestControllerV1 {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<TaskDto> updateTaskTitle(@PathVariable UUID id, @RequestBody @Valid TaskUpdateDto updateDto) {
+	public ResponseEntity<TaskDto> updateTask(@PathVariable UUID id, @RequestBody @Valid TaskUpdateDto updateDto) {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(taskService.updateTask(id, updateDto));

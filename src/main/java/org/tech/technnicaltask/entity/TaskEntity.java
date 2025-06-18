@@ -1,7 +1,10 @@
 package org.tech.technnicaltask.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.tech.technnicaltask.utils.Status;
@@ -12,6 +15,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "tasks")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TaskEntity {
 
 	@Id
@@ -34,4 +40,12 @@ public class TaskEntity {
 	@UpdateTimestamp
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
+
+	public TaskEntity(String title, String description, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+		this.title = title;
+		this.description = description;
+		this.status = status;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
 }
