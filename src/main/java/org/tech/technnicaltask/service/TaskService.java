@@ -3,6 +3,7 @@ package org.tech.technnicaltask.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.tech.technnicaltask.dto.TaskDto;
 import org.tech.technnicaltask.dto.TaskUpdateDto;
 import org.tech.technnicaltask.entity.TaskEntity;
@@ -59,11 +60,15 @@ public class TaskService {
 
 	//Deleting Task from DB. If it's not found it is silently ignored
 	public void deleteById(UUID id) {
+		if (id == null) {
+			throw new BadRequestException(ErrorCode.INVALID_UUID.getFormattedMessage("null"));
+		}
 		log.info("Deleting task with id {}", id.toString());
 		taskRepository.deleteById(id);
 	}
 
 	//Updating task. If field in TaskUpdateDto != null, this field will be changed in entity
+	@Transactional
 	public TaskDto updateTask(UUID id, TaskUpdateDto updateDto) {
 		if (updateDto == null) {
 			throw new BadRequestException(ErrorCode.NULL_UPDATE_DTO.getMessage());
