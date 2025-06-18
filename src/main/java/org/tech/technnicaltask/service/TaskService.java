@@ -63,8 +63,9 @@ public class TaskService {
 		if (id == null) {
 			throw new BadRequestException(ErrorCode.INVALID_UUID.getFormattedMessage("null"));
 		}
-		log.info("Deleting task with id {}", id.toString());
-		taskRepository.deleteById(id);
+		log.info("Deleting task with id {}", id);
+		TaskEntity entity = getEntityById(id);
+		taskRepository.delete(entity);
 	}
 
 	//Updating task. If field in TaskUpdateDto != null, this field will be changed in entity

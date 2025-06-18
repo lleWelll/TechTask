@@ -3,6 +3,8 @@ package org.tech.technnicaltask.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.tech.technnicaltask.dto.TaskDto;
 import org.tech.technnicaltask.dto.TaskUpdateDto;
@@ -20,27 +22,38 @@ public class TaskRestControllerV1 {
 	private final TaskService taskService;
 
 	@GetMapping("/{id}")
-	public TaskDto getById(@PathVariable UUID id) {
-		return taskService.getById(id);
+	public ResponseEntity<TaskDto> getById(@PathVariable UUID id) {
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(taskService.getById(id));
 	}
 
 	@GetMapping()
-	public List<TaskDto> getAll() {
-		return taskService.getAllTasks();
+	public ResponseEntity<List<TaskDto>> getAll() {
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(taskService.getAllTasks());
 	}
 
 	@PostMapping()
-	public TaskDto saveTask(@RequestBody @Valid TaskDto dto) {
-		return taskService.save(dto);
+	public ResponseEntity<TaskDto> saveTask(@RequestBody @Valid TaskDto dto) {
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(taskService.save(dto));
 	}
 
 	@PutMapping("/{id}")
-	public TaskDto updateTaskTitle(@PathVariable UUID id, @RequestBody @Valid TaskUpdateDto updateDto) {
-		return taskService.updateTask(id, updateDto);
+	public ResponseEntity<TaskDto> updateTaskTitle(@PathVariable UUID id, @RequestBody @Valid TaskUpdateDto updateDto) {
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(taskService.updateTask(id, updateDto));
 	}
 
 	@DeleteMapping("/{id}")
-	public void deleteTask(@PathVariable UUID id) {
+	public ResponseEntity<String> deleteTask(@PathVariable UUID id) {
 		taskService.deleteById(id);
+		return ResponseEntity
+				.status(HttpStatus.NO_CONTENT)
+				.body("Successfully deleted");
 	}
 }
