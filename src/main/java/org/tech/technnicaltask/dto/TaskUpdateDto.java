@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record TaskUpdateDto(
-		@Pattern(regexp = "\\S+", message = "title can't empty")
+		@Pattern(regexp = "^(?!\\s*$).+$", message = "title can't empty")
 		String title,
 		String description,
 		String status) {

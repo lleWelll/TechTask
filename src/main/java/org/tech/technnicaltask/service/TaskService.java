@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.tech.technnicaltask.dto.TaskDto;
 import org.tech.technnicaltask.dto.TaskUpdateDto;
 import org.tech.technnicaltask.entity.TaskEntity;
+import org.tech.technnicaltask.exceptions.BadRequestException;
 import org.tech.technnicaltask.exceptions.TaskNotFoundException;
 import org.tech.technnicaltask.mapper.TaskMapper;
 import org.tech.technnicaltask.repository.TaskRepository;
+import org.tech.technnicaltask.utils.ErrorCode;
 import org.tech.technnicaltask.utils.Status;
 
 import java.util.List;
@@ -37,7 +39,7 @@ public class TaskService {
 		List<TaskEntity> entities = taskRepository.findAll();
 		if (entities.isEmpty()) {
 			log.warn("There are no tasks");
-			throw new TaskNotFoundException("There are no tasks");
+			throw new TaskNotFoundException(ErrorCode.EMPTY_TASKS_LIST.getMessage());
 		}
 		return mapper.toDtoList(entities);
 	}
@@ -45,6 +47,7 @@ public class TaskService {
 	//Saving Task to DB
 	public TaskDto save(TaskDto dto) {
 		if (dto.getId() != null) {
+			log.warn("dto have user specified id, setting it to null");
 			dto.setId(null);
 		}
 		log.info("Saving task: {}", dto);
@@ -63,7 +66,7 @@ public class TaskService {
 	//Updating task. If field in TaskUpdateDto != null, this field will be changed in entity
 	public TaskDto updateTask(UUID id, TaskUpdateDto updateDto) {
 		if (updateDto == null) {
-			throw new IllegalArgumentException("Provided updateDto is null");
+			throw new BadRequestException(ErrorCode.NULL_UPDATE_DTO.getMessage());
 		}
 		return modifyTask(id, entity -> {
 			//selecting fields that need to change (multiple fields can be changed)
@@ -76,7 +79,7 @@ public class TaskService {
 	//Modifies Task in DB. Uses Consumer to update the state of task and saves object
 	private TaskDto modifyTask(UUID id, Consumer<TaskEntity> modifyFunction) {
 		if (id == null || modifyFunction == null) {
-			throw new IllegalArgumentException("Illegal arguments to modify task");
+			throw new BadRequestException(ErrorCode.ILLEGAL_MODIFY_ARGUMENTS.getMessage());
 		}
 		TaskEntity entity = getEntityById(id);
 		modifyFunction.accept(entity); //Modifying entity's state
@@ -89,7 +92,7 @@ public class TaskService {
 	private TaskEntity getEntityById(UUID id) {
 		log.info("Getting entity with id {}", id.toString());
 		return taskRepository.findById(id).orElseThrow(
-				() -> new TaskNotFoundException("Task with id " + id + " is not found")
+				() -> new TaskNotFoundException(ErrorCode.TASK_NOT_FOUND.getFormattedMessage(id))
 		);
 	}
 }
