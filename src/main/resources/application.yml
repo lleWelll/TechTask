@@ -21,5 +21,13 @@ logging:
   file:
     name: "logs/app.log"
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    url: /openapi.yaml
+
 server:
   port: 8080
