@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,6 +24,7 @@ import org.tech.technnicaltask.utils.Status;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -128,10 +130,9 @@ public class TaskRestControllerV1Test {
 		verify(taskService, times(1)).save(defaultDto);
 	}
 
-	@Test
-	void saveTask_WithInvalidData_ReturnsBadRequestHttpStatus() throws Exception {
-		TaskDto invalid = defaultDto;
-		invalid.setTitle("");
+	@ParameterizedTest
+	@MethodSource("generateInvalidDtos")
+	void saveTask_WithInvalidData_ReturnsBadRequestHttpStatus(TaskDto invalid) throws Exception {
 		String dtoJson = mapper.writeValueAsString(invalid);
 
 		mockMVC.perform(post("/api/v1/tasks").contentType(MediaType.APPLICATION_JSON).content(dtoJson))
@@ -221,7 +222,7 @@ public class TaskRestControllerV1Test {
 				.andExpect(jsonPath("$.message").exists());
 	}
 
-	private TaskDto createDefaultTaskDto() {
+	private static TaskDto createDefaultTaskDto() {
 		return TaskDto.builder()
 				.id(UUID.fromString("f4befda1-dbe2-425d-a52e-939d70d259ba"))
 				.title("Default Task")
@@ -230,8 +231,30 @@ public class TaskRestControllerV1Test {
 				.build();
 	}
 
-	private TaskUpdateDto createDefaultTaskUpdateDto() {
+	private static TaskUpdateDto createDefaultTaskUpdateDto() {
 		return new TaskUpdateDto("ValidTitle", "Description", "COMPLETED");
+	}
+
+	private static List<TaskDto> generateInvalidDtos() {
+
+		//Creating list of consumers that will change dtos
+		List<Consumer<TaskDto>> modifiers = List.of(
+				dto -> dto.setTitle(null),
+				dto -> dto.setTitle(""),
+				dto -> dto.setTitle(" "),
+				dto -> dto.setTitle("a".repeat(101)),
+				dto -> dto.setStatus(null),
+				dto -> dto.setStatus("This status does not exist")
+		);
+
+		//creating list of modified dtos
+		return modifiers.stream()
+				.map(modifier -> {
+					TaskDto copy = createDefaultTaskDto();
+					modifier.accept(copy);
+					return copy;
+				})
+				.toList();
 	}
 
 	//initialization of MockMVC for testing returning http status codes and exception handling

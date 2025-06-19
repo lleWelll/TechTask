@@ -15,7 +15,8 @@ public class TaskDto {
 	//This field can be null
 	private UUID id;
 
-	@NotEmpty(message = "title can't be null or empty")
+	@NotBlank(message = "title can't be null or empty")
+	@Size(max = 100)
 	private String title;
 
 	//This field can be null
