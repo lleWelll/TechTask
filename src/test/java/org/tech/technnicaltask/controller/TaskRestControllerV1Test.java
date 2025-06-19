@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
@@ -153,13 +154,22 @@ public class TaskRestControllerV1Test {
 		verify(taskService, times(0)).save(defaultDto);
 	}
 
-	@Test
-	public void updateTask_WithValidUpdateDto_ReturnsOkAndUpdatedDto() throws Exception {
-		TaskDto expected = defaultDto; //suppose this object is correctly modified TaskDto
+	@ParameterizedTest
+	@CsvSource({
+			"ValidTitle, Description, PENDING",
+			" ValidName , , completed",
+			"ValidToo, Description, iN_ProGress"
+	})
+	public void updateTask_WithValidUpdateDto_ReturnsOkAndUpdatedDto(String title, String description, String status) throws Exception {
+		TaskUpdateDto taskUpdateDto = new TaskUpdateDto(title, description, status);
+		String jsonDto = mapper.writeValueAsString(taskUpdateDto);
 
-		String jsonDto = mapper.writeValueAsString(defaultUpdateDto);
+		TaskDto expected = defaultDto;
+		expected.setTitle(taskUpdateDto.title());
+		expected.setDescription(taskUpdateDto.description());
+		expected.setStatus(taskUpdateDto.status());
 
-		when(taskService.updateTask(defaultDto.getId(), defaultUpdateDto)).thenReturn(expected);
+		when(taskService.updateTask(defaultDto.getId(), taskUpdateDto)).thenReturn(expected);
 
 		mockMVC.perform(put("/api/v1/tasks/{id}", defaultDto.getId()).contentType(MediaType.APPLICATION_JSON).content(jsonDto))
 				.andExpect(status().isOk())
@@ -168,12 +178,12 @@ public class TaskRestControllerV1Test {
 				.andExpect(jsonPath("$.description").value(expected.getDescription()))
 				.andExpect(jsonPath("$.status").value(expected.getStatus()));
 
-		verify(taskService, times(1)).updateTask(defaultDto.getId(), defaultUpdateDto);
+		verify(taskService, times(1)).updateTask(defaultDto.getId(), taskUpdateDto);
 	}
 
-	@Test
-	public void updateTask_WithInvalidUpdateDto_ReturnsBadRequestStatus() throws Exception {
-		TaskUpdateDto invalid = new TaskUpdateDto("", "Desc", "PENDING");
+	@ParameterizedTest
+	@MethodSource("generateInvalidUpdateTasks")
+	public void updateTask_WithInvalidUpdateDto_ReturnsBadRequestStatus(TaskUpdateDto invalid) throws Exception {
 		String jsonDto = mapper.writeValueAsString(invalid);
 
 		mockMVC.perform(put("/api/v1/tasks/{id}", defaultDto.getId())
@@ -282,5 +292,13 @@ public class TaskRestControllerV1Test {
 					return copy;
 				})
 				.toList();
+	}
+
+	private static List<TaskUpdateDto> generateInvalidUpdateTasks() {
+		TaskUpdateDto invalid1 = new TaskUpdateDto("", "Description", "PENDING");
+		TaskUpdateDto invalid2 = new TaskUpdateDto(" ", "Description", "PENDING");
+		TaskUpdateDto invalid3 = new TaskUpdateDto("a".repeat(101), "Description", "PENDING");
+
+		return List.of(invalid1, invalid2, invalid3);
 	}
 }
