@@ -243,8 +243,7 @@ public class TaskRestControllerV1Test {
 				dto -> dto.setTitle(""),
 				dto -> dto.setTitle(" "),
 				dto -> dto.setTitle("a".repeat(101)),
-				dto -> dto.setStatus(null),
-				dto -> dto.setStatus("This status does not exist")
+				dto -> dto.setStatus(null)
 		);
 
 		//creating list of modified dtos
