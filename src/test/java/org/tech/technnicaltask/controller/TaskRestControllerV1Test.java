@@ -117,17 +117,19 @@ public class TaskRestControllerV1Test {
 	}
 
 	//Testing that controller successfully saves new valid task
-	@Test
-	public void saveTask_WithValidData_ReturnOkAndSavedDto() throws Exception {
-		String dtoJson = mapper.writeValueAsString(defaultDto);
+	@ParameterizedTest
+	@MethodSource("generateValidDtos")
+	public void saveTask_WithValidData_ReturnOkAndSavedDto(TaskDto valid) throws Exception {
+		String dtoJson = mapper.writeValueAsString(valid);
 
-		when(taskService.save(defaultDto)).thenReturn(defaultDto);
+		TaskDto expected = valid;
+		expected.setId(defaultDto.getId()); //This id is added because, after saving in db service return saved entity with automatically assigned id
+		when(taskService.save(any())).thenReturn(expected);
 
 		mockMVC.perform(post("/api/v1/tasks").contentType(MediaType.APPLICATION_JSON).content(dtoJson))
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id").value(defaultDto.getId().toString()));
-
-		verify(taskService, times(1)).save(defaultDto);
+				.andExpect(jsonPath("$.id").value(expected.getId().toString()));
+		verify(taskService, times(1)).save(any());
 	}
 
 	@ParameterizedTest
@@ -235,8 +237,15 @@ public class TaskRestControllerV1Test {
 		return new TaskUpdateDto("ValidTitle", "Description", "COMPLETED");
 	}
 
-	private static List<TaskDto> generateInvalidDtos() {
+	//initialization of MockMVC for testing returning http status codes and exception handling
+	private MockMvc createMockMvc() {
+		return MockMvcBuilders
+				.standaloneSetup(controller)
+				.setControllerAdvice(new GlobalExceptionHandler()) //Adding ExceptionHandler to test exception handling
+				.build();
+	}
 
+	private static List<TaskDto> generateInvalidDtos() {
 		//Creating list of consumers that will change dtos
 		List<Consumer<TaskDto>> modifiers = List.of(
 				dto -> dto.setTitle(null),
@@ -246,21 +255,32 @@ public class TaskRestControllerV1Test {
 				dto -> dto.setStatus(null)
 		);
 
-		//creating list of modified dtos
-		return modifiers.stream()
+		return applyModifiers(modifiers);
+	}
+
+	private static List<TaskDto> generateValidDtos() {
+		//Creating list of consumers that will change dtos
+		List<Consumer<TaskDto>> modifiers = List.of(
+				dto -> dto.setId(null),
+				dto -> dto.setTitle("Valid Name"),
+				dto -> dto.setTitle(" Valid Name "),
+				dto -> dto.setStatus("pending"),
+				dto -> dto.setStatus("PeNdInG"),
+				dto -> dto.setStatus("IN_PROGRESS"),
+				dto -> dto.setStatus("COMPLETED")
+		);
+
+		return applyModifiers(modifiers);
+	}
+
+	//creating list of modified dtos
+	private static List<TaskDto> applyModifiers(List<Consumer<TaskDto>> modifiers) {
+		return  modifiers.stream()
 				.map(modifier -> {
 					TaskDto copy = createDefaultTaskDto();
 					modifier.accept(copy);
 					return copy;
 				})
 				.toList();
-	}
-
-	//initialization of MockMVC for testing returning http status codes and exception handling
-	private MockMvc createMockMvc() {
-		return MockMvcBuilders
-				.standaloneSetup(controller)
-				.setControllerAdvice(new GlobalExceptionHandler()) //Adding ExceptionHandler to test exception handling
-				.build();
 	}
 }
