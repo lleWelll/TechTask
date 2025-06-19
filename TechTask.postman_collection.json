@@ -1,0 +1,124 @@
+{
+	"info": {
+		"_postman_id": "a4fe6452-b5b9-427a-a3e9-a50241087d5b",
+		"name": "TechTask",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "39368219"
+	},
+	"item": [
+		{
+			"name": "Getting All Tasks",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/v1/tasks"
+			},
+			"response": []
+		},
+		{
+			"name": "Getting Task",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"New Task\",\n    \"description\": \"In this you need ...\",\n    \"status\": \"PENDING\"\n}"
+				},
+				"url": "http://localhost:8080/api/v1/tasks/ab5c7bb3-2bc3-4f98-ae24-b595818ab1c4"
+			},
+			"response": []
+		},
+		{
+			"name": "SavingTask",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"New Task\",\n    \"description\": \"In this you need ...\",\n    \"status\": \"PENDING\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/v1/tasks"
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting Task",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/tasks/049e9726-489b-4077-a565-d9e533952ba4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"tasks",
+						"049e9726-489b-4077-a565-d9e533952ba4"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Task",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"New Title\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/v1/tasks/ab5c7bb3-2bc3-4f98-ae24-b595818ab1c4"
+			},
+			"response": []
+		}
+	]
+}
