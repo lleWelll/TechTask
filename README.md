@@ -138,4 +138,4 @@ HTTP/1.1 200 OK
 ```
 
 ## Демонстрация:
-
+[Коллекция Postman](TechTask.postman_collection.json)
