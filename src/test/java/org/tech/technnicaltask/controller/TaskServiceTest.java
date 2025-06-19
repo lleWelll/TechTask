@@ -4,15 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.tech.technnicaltask.dto.TaskDto;
+import org.tech.technnicaltask.dto.TaskUpdateDto;
 import org.tech.technnicaltask.entity.TaskEntity;
+import org.tech.technnicaltask.exceptions.BadRequestException;
 import org.tech.technnicaltask.exceptions.TaskNotFoundException;
 import org.tech.technnicaltask.mapper.TaskMapper;
 import org.tech.technnicaltask.repository.TaskRepository;
@@ -44,10 +43,13 @@ public class TaskServiceTest {
 
 	private TaskEntity defaultTaskEntity;
 
+	private TaskUpdateDto defaulttaskUpdateDto;
+
 	@BeforeEach
 	public void init() {
 		defaultTaskEntity = createDefaultTaskEntity();
 		defaultTaskDto = createDefaultTaskDto();
+		defaulttaskUpdateDto = createDefaultTaskUpdateDto();
 
 		lenient().when(mapper.toEntity(any())).thenReturn(defaultTaskEntity);
 		lenient().when(mapper.toDtoList(any())).thenReturn(List.of(defaultTaskDto));
@@ -102,20 +104,74 @@ public class TaskServiceTest {
 		verify(taskRepository, times(1)).save(defaultTaskEntity);
 	}
 
-	@ParameterizedTest
-	@NullSource
-	public void save_WithNullTaskDto_ThrowsBadRequestException(TaskDto dto) {
+	@Test
+	public void deleteById_WithValidId_DeletesTask() {
+		doNothing().when(taskRepository).delete(any());
+		when(taskRepository.findById(any())).thenReturn(Optional.ofNullable(defaultTaskEntity));
 
+		taskService.deleteById(defaultTaskDto.getId());
+		verify(taskRepository,times(1)).delete(defaultTaskEntity);
 	}
 
+	@ParameterizedTest
+	@NullSource
+	public void deleteById_WithNullId_ThrowsBadRequestException(UUID id) {
+		assertThrows(BadRequestException.class, () -> taskService.deleteById(id));
+		verify(taskRepository, times(0)).delete(any());
+	}
 
+	@Test
+	public void deleteById_WithInvalidId_ThrowsNotFoundException() {
+		//Suppose this id doesn't exist
+		when(taskRepository.findById(defaultTaskDto.getId())).thenThrow(new TaskNotFoundException(ErrorCode.TASK_NOT_FOUND.getMessage()));
 
+		Exception exception = assertThrows(TaskNotFoundException.class, () -> taskService.deleteById(defaultTaskDto.getId()));
+		assertEquals(ErrorCode.TASK_NOT_FOUND.getMessage(), exception.getMessage());
+	}
 
+	@Test
+	public void updateTask_WithValidData_ReturnsUpdatedDto() {
+		when(taskRepository.findById(any())).thenReturn(Optional.ofNullable(defaultTaskEntity));
+		when(taskRepository.save(any())).thenReturn(defaultTaskEntity);
 
+		TaskDto expected = defaultTaskDto;
+		expected.setTitle(defaultTaskDto.getTitle());
+		expected.setDescription(defaulttaskUpdateDto.description());
+		expected.setStatus(defaulttaskUpdateDto.status());
 
+		assertEquals(expected, taskService.updateTask(defaultTaskDto.getId(), defaulttaskUpdateDto));
+		verify(taskRepository, times(1)).findById(defaultTaskDto.getId());
+		verify(taskRepository, times(1)).save(defaultTaskEntity);
+	}
 
+	@ParameterizedTest
+	@NullSource
+	public void updateTask_WithNullTaskUpdateDto_ThrowsBadRequestException(TaskUpdateDto dto) {
+		Exception exception = assertThrows(BadRequestException.class, () -> taskService.updateTask(defaultTaskDto.getId(), dto));
+		assertEquals(ErrorCode.NULL_UPDATE_DTO.getMessage(), exception.getMessage());
+		verify(taskRepository, times(0)).findById(any());
+		verify(taskRepository, times(0)).save(any());
+	}
 
+	@ParameterizedTest
+	@NullSource
+	public void updateTask_WithNullId_ThrowsBadRequestException(UUID id) {
+		Exception exception = assertThrows(BadRequestException.class, () -> taskService.updateTask(id, defaulttaskUpdateDto));
+		assertEquals(ErrorCode.ILLEGAL_MODIFY_ARGUMENTS.getMessage(), exception.getMessage());
+		verify(taskRepository, times(0)).findById(any());
+		verify(taskRepository, times(0)).save(any());
+	}
 
+	@Test
+	public void updateTask_WithInvalidId_ThrowsTaskNotFoundException() {
+		//Suppose this id doesn't exist
+		when(taskRepository.findById(defaultTaskDto.getId())).thenThrow(new TaskNotFoundException(ErrorCode.TASK_NOT_FOUND.getMessage()));
+
+		Exception exception = assertThrows(TaskNotFoundException.class, () -> taskService.deleteById(defaultTaskDto.getId()));
+		assertEquals(ErrorCode.TASK_NOT_FOUND.getMessage(), exception.getMessage());
+		verify(taskRepository, times(1)).findById(any());
+		verify(taskRepository, times(0)).save(any());
+	}
 
 	private TaskDto createDefaultTaskDto() {
 		return TaskDto.builder()
@@ -133,6 +189,10 @@ public class TaskServiceTest {
 				.description("It's test task")
 				.status(Status.PENDING)
 				.build();
+	}
+
+	private TaskUpdateDto createDefaultTaskUpdateDto() {
+		return new TaskUpdateDto("ValidTitle", "Description", "COMPLETED");
 	}
 
 }
